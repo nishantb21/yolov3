@@ -1,0 +1,28 @@
+# TODO: Pending support for GPUs flag. Do not use until then
+version: '3.7'
+services:
+    base:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/base/Dockerfile
+            args:
+                usr: ${USR}
+                usrid: ${USRID}
+                grp: ${GRP}
+                grpid: ${GRPID}
+        image: base:latest
+
+    backbone:
+        depends_on: 
+            - base
+        build:
+            context: .
+            dockerfile: ./dockerfiles/train/Dockerfile
+        image: backbone:latest
+        volumes:
+            - type: bind
+              source: ${CURR_DIR}/save
+              target: /code/save
+            - type: bind
+              source: ${CURR_DIR}/datasets
+              target: /code/datasets

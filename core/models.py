@@ -39,3 +39,16 @@ class DarkNet53(torch.nn.Module):
         x = self.final_cls(x)
 
         return x
+
+if __name__ == "__main__":
+    height = 512
+    width = 512
+    batch_size = 8
+    channels = 3
+    classes = 1000
+
+    x = torch.zeros((batch_size, channels, height, width))
+    net = DarkNet53(height, width, channels, classes)
+    y = net(x)
+    print(y.shape)
+    input()

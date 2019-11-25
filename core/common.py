@@ -1,12 +1,21 @@
 import torch
 
 class Dense(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, activation="linear"):
         super(Dense, self).__init__()
         self.dense = torch.nn.Linear(in_channels, out_channels)
+        if activation == "linear":
+            self.activation = torch.nn.Identity()
+        elif activation == "leaky":
+            self.activation = torch.nn.LeakyReLU()
+        elif activation == "softmax":
+            self.activation = torch.nn.Softmax(dim=1)
 
     def forward(self, inp):
-        return self.dense(inp)
+        x = self.dense(inp)
+        x = self.activation(x)
+
+        return x
 
 class Flatten(torch.nn.Module):
     def __init__(self):

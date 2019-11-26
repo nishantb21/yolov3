@@ -33,7 +33,7 @@ class Convolution(torch.nn.Module):
         if padding == "same":
             padding = kernel_size // 2
 
-        self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding)
+        self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=False)
         self.bn = torch.nn.BatchNorm2d(out_channels)
         if activation == "linear":
             self.activation = torch.nn.Identity()
@@ -54,9 +54,10 @@ class ResidualBlock(torch.nn.Module):
         self.conv_2 = Convolution(channels_1, channels_2, 3, 1)
 
     def forward(self, inp):
+        residual = inp
         x = self.conv_1(inp)
         x = self.conv_2(x)
-        x += inp
+        x += residual
 
         return x
 

@@ -35,7 +35,7 @@ class Trainer():
                 self.model.eval()
                 n_total_count = 0
                 n_correct_count = 0
-                tqdm_obj = tqdm(self.validation_dataset_loader)
+                tqdm_obj = tqdm(self.validation_dataset_loader, ncols=100)
                 with torch.no_grad():
                     for x, y in tqdm_obj:
                         n_total_count += x.shape[0]
@@ -43,7 +43,7 @@ class Trainer():
                         predicted = self.model(x)
                         loss = self.criterion(predicted, y)
                         n_correct_count += int(torch.sum(torch.argmax(predicted, 1) == y))
-                        tqdm_obj.set_description(desc=return_string("TRAINNING", loss, n_correct_count / n_total_count))
+                        tqdm_obj.set_description(desc=return_string("VALIDATION", loss, n_correct_count / n_total_count))
 
 class ImageNetBuilder():
     def __init__(self):
@@ -53,20 +53,21 @@ class ImageNetBuilder():
         pass
 
 if __name__ == "__main__":
-    height = 256
-    width = 256
+    height = 512
+    width = 512
     classes = 2
     batch_size = 2
     channels = 3
     root_dir = "./datasets/dummy"
-    epochs = 1
+    epochs = 10
 
     from models import DarkNet53
     from loaders import ImageNetDatasetLoader 
 
     net = DarkNet53(height, width, channels, classes)
+    # net = torch.hub.load('pytorch/vision:v0.4.2', 'resnet50', pretrained=False)
     loaders_obj = ImageNetDatasetLoader(root_dir, height, width, batch_size)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-    trainer_obj = Trainer(net, optimizer, criterion, epochs, loaders_obj.get_loader())
+    trainer_obj = Trainer(net, optimizer, criterion, epochs, loaders_obj.get_loader(), loaders_obj.get_loader())
     trainer_obj.train()

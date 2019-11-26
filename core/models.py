@@ -18,9 +18,9 @@ class DarkNet53(torch.nn.Module):
         self.repeater_4 = residual_repeater(8, 512, 256, 512)
         self.conv_6 = Convolution(512, 1024, 3, 2)
         self.repeater_5 = residual_repeater(4, 1024, 512, 1024)
-        self.avg_pool = torch.nn.AvgPool2d((downsampled_height, downsampled_width))
+        self.avg_pool = torch.nn.AdaptiveAvgPool2d((1, 1))
         self.flatten = Flatten()
-        self.final_cls = Dense(1024, classes, activation="softmax")
+        self.final_cls = torch.nn.Linear(1024, classes)
 
     def forward(self, inp):
         x = self.conv_1(inp)

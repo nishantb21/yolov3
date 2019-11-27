@@ -1,11 +1,9 @@
 import torch
-from common import Convolution, Flatten, Dense, residual_repeater
+from core.common import Convolution, Flatten, Dense, residual_repeater
 
 class DarkNet53(torch.nn.Module):
-    def __init__(self, height, width, channels, classes):
+    def __init__(self, channels, classes):
         super(DarkNet53, self).__init__()
-        downsampled_height = height // 32
-        downsampled_width = width // 32
 
         self.conv_1 = Convolution(channels, 32, 3, 1)
         self.conv_2 = Convolution(32, 64, 3, 2)
@@ -40,15 +38,5 @@ class DarkNet53(torch.nn.Module):
 
         return x
 
-if __name__ == "__main__":
-    height = 512
-    width = 512
-    batch_size = 8
-    channels = 3
-    classes = 1000
-
-    x = torch.zeros((batch_size, channels, height, width))
-    net = DarkNet53(height, width, channels, classes)
-    y = net(x)
-    print(y.shape)
-    input()
+backbones = {}
+backbones["DarkNet53"] = DarkNet53

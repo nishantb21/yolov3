@@ -17,18 +17,3 @@ class ImageNetDatasetLoader():
 
     def get_loader(self):
         return self.dataset_loader
-
-if __name__ == "__main__":
-    height = 256
-    width = 256
-    batch_size = 4
-    root_dir = "./datasets/dummy"
-    obj = ImageNetDatasetLoader(root_dir, height, width, batch_size)
-    dataset = obj.get_loader()
-    print(len(dataset))
-    counter = 1
-    tqdm_obj = tqdm(dataset, ncols=100)
-
-    for x, y in tqdm_obj:
-        tqdm_obj.set_description("Current iter {}".format(counter))
-        counter += 1

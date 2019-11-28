@@ -22,7 +22,7 @@ class Trainer():
     def train(self):
         if self.logs_path:
             summary_writer = SummaryWriter(log_dir=self.logs_path)
-        
+
         for i in range(self.epochs):
             iteration = i + 1
             print("Epoch {} / {}".format(iteration, self.epochs))
@@ -30,7 +30,7 @@ class Trainer():
             n_total_count = 0
             n_correct_count = 0
             tqdm_obj = tqdm(self.training_dataset_loader, ncols=100)
-            counter = 0
+            counter = len(tqdm_obj) * i
 
             for x, y in tqdm_obj:
                 counter += 1
@@ -45,15 +45,15 @@ class Trainer():
                 accuracy = n_correct_count / n_total_count 
                 tqdm_obj.set_description(desc=return_string("TRAINNING", loss, accuracy))
                 if self.logs_path:
-                    summary_writer.add_scalar('Loss/train', loss, iteration * counter)
-                    summary_writer.add_scalar('Accuracy/train', accuracy, iteration * counter)
+                    summary_writer.add_scalar('Loss/train', loss, counter)
+                    summary_writer.add_scalar('Accuracy/train', accuracy, counter)
 
             if self.validation_dataset_loader:
                 self.model.eval()
                 n_total_count = 0
                 n_correct_count = 0
                 tqdm_obj = tqdm(self.validation_dataset_loader, ncols=100)
-                counter = 0
+                counter = len(tqdm_obj) * i
 
                 with torch.no_grad():
                     for x, y in tqdm_obj:
@@ -66,8 +66,8 @@ class Trainer():
                         accuracy = n_correct_count / n_total_count
                         tqdm_obj.set_description(desc=return_string("VALIDATION", loss, accuracy))
                         if self.logs_path:
-                            summary_writer.add_scalar('Loss/validation', loss, iteration * counter)
-                            summary_writer.add_scalar('Accuracy/validation', accuracy, iteration * counter)
+                            summary_writer.add_scalar('Loss/validation', loss, counter)
+                            summary_writer.add_scalar('Accuracy/validation', accuracy, counter)
 
             if self.lr_scheduler:
                 self.lr_scheduler.step()

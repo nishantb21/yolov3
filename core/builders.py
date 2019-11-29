@@ -80,6 +80,7 @@ class ImageNetBuilder():
         self.height = config.IMAGE.HEIGHT
         self.width = config.IMAGE.WIDTH
         self.base_path = config.BACKBONE.DATASET.BASE_PATH
+        self.val_base_path = config.BACKBONE.DATASET.VAL_BASE_PATH
         self.channels = config.IMAGE.CHANNELS
         self.classes = config.BACKBONE.MODEL.CLASSES
         self.batch_size = config.BACKBONE.TRAINING.BATCH_SIZE
@@ -99,7 +100,7 @@ class ImageNetBuilder():
         training_dataset_loader_obj = ImageNetDatasetLoader(self.base_path, self.height, self.width, self.batch_size)
 
         # Get the validation dataset loader
-        # TODO: Add validation dataset loader
+        validation_dataset_loader_obj = ImageNetDatasetLoader(self.val_base_path, self.height, self.width, self.batch_size)
 
         # Create the criterion
         criterion = torch.nn.CrossEntropyLoss()
@@ -111,7 +112,7 @@ class ImageNetBuilder():
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_epochs)
 
         # Create trainer object
-        self.trainer_obj = Trainer(model, optimizer, criterion, self.epochs, training_dataset_loader_obj.get_loader(), lr_scheduler=lr_scheduler, weights_path=self.weights_path, logs_path=self.logs_path)
+        self.trainer_obj = Trainer(model, optimizer, criterion, self.epochs, training_dataset_loader_obj.get_loader(), validation_dataset_loader=validation_dataset_loader_obj.get_loader(), lr_scheduler=lr_scheduler, weights_path=self.weights_path, logs_path=self.logs_path)
 
     def get_trainer(self):
         return self.trainer_obj

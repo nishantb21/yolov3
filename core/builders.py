@@ -75,8 +75,16 @@ class Trainer():
             if self.weights_path:
                 torch.save(self.model.state_dict(), self.weights_path.format(epoch=iteration))
 
-class ImageNetBuilder():
+class Builder():
+    def __init__(self):
+        self.trainer_obj = None
+
+    def get_trainer(self):
+        return self.trainer_obj
+
+class ImageNetBuilder(Builder):
     def __init__(self, config):
+        super(Builder, self).__init__()
         self.height = config.IMAGE.HEIGHT
         self.width = config.IMAGE.WIDTH
         self.base_path = config.BACKBONE.DATASET.BASE_PATH
@@ -113,6 +121,3 @@ class ImageNetBuilder():
 
         # Create trainer object
         self.trainer_obj = Trainer(model, optimizer, criterion, self.epochs, training_dataset_loader_obj.get_loader(), validation_dataset_loader=validation_dataset_loader_obj.get_loader(), lr_scheduler=lr_scheduler, weights_path=self.weights_path, logs_path=self.logs_path)
-
-    def get_trainer(self):
-        return self.trainer_obj

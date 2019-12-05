@@ -3,8 +3,16 @@ import torch
 from tqdm import tqdm
 from torchvision import transforms, datasets
 
-class ImageNetDatasetLoader():
+class DatasetLoader():
+    def __init__(self):
+        self.dataset_loader = None
+
+    def get_loader(self):
+        return self.dataset_loader
+
+class ImageNetDatasetLoader(DatasetLoader):
     def __init__(self, root_dir, height, width, batch_size):
+        super(ImageNetDatasetLoader, self).__init__()
         data_transform = transforms.Compose([
             transforms.RandomResizedCrop((height, width)),
             transforms.RandomHorizontalFlip(),
@@ -15,5 +23,8 @@ class ImageNetDatasetLoader():
         imagenet_dataset = datasets.ImageFolder(root=root_dir, transform=data_transform)
         self.dataset_loader = torch.utils.data.DataLoader(imagenet_dataset, batch_size=batch_size, shuffle=True, num_workers=10)
 
-    def get_loader(self):
-        return self.dataset_loader
+class COCODatasetLoader(DatasetLoader):
+    def __init__(self):
+        super(COCODatasetLoader, self).__init__()
+        pass
+    

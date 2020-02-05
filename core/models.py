@@ -67,7 +67,7 @@ class yolov3(torch.nn.Module):
         block_5_output = self.block_5(block_4_output)
         s_b = self.small_boxes(block_5_output)
 
-        return l_b, m_b, s_b
+        return s_b, m_b, l_b
 
 backbones = {}
 backbones["DarkNet53"] = DarkNet53

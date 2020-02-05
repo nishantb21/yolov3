@@ -2,13 +2,13 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import json
 from tqdm import tqdm
-from core.utils import return_string, create_and_get_paths, get_optimizer
-from core.models import backbones
-from core.loaders import ImageNetDatasetLoader
+from core.utils import return_string, create_and_get_paths, get_optimizer, loss_od
+from core.models import backbones, yolov3
+from core.loaders import ImageNetDatasetLoader, COCODatasetLoader
 
 class Trainer():
     def __init__(self, model, optimizer, criterion, epochs, training_dataset_loader, validation_dataset_loader=None, lr_scheduler=None, weights_path=None, logs_path=None):
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu ")
         self.model = model.to(self.device)
         self.optimizer = optimizer
         self.criterion = criterion
@@ -121,3 +121,42 @@ class ImageNetBuilder(Builder):
 
         # Create trainer object
         self.trainer_obj = Trainer(model, optimizer, criterion, self.epochs, training_dataset_loader_obj.get_loader(), validation_dataset_loader=validation_dataset_loader_obj.get_loader(), lr_scheduler=lr_scheduler, weights_path=self.weights_path, logs_path=self.logs_path)
+
+class ODBuilder(Builder):
+    def __init__(self, config):
+        self.height = config.IMAGE.HEIGHT
+        self.width = config.IMAGE.WIDTH
+        self.channels = config.IMAGE.CHANNELS
+        self.classes = 1000
+        self.imagenet_weights = config.OD.IMAGENET_WEIGHTS_PATH
+        self.od_classes = config.OD.CLASSES
+        self.num_scales = config.OD.NUM_SCALES
+        self.scales = config.OD.SCALES
+
+    def build(self):
+        # Get backbone model
+        backbone_model = backbones[self.model_name](self.channels, self.classes)
+        
+        # Restore weights 
+        backbone_model.load_state_dict(torch.load(self.imagenet_weights))
+
+        # Get the OD model
+        model = yolov3(backbone_model, self.od_classes, self.scales)
+
+        # Get the training dataset loader
+        training_dataset_loader_obj = COCODatasetLoader(self.training_root, self.training_annFile, self.height, self.width, self.od_classes, self.anchors, self.scales)
+
+        # Get the validation dataset loader
+        validation_dataset_loader_obj = COCODatasetLoader(self.validation_root, self.validation_annFile, self.height, self.width, self.od_classes, self.anchors, self.scales)
+
+        # Get the criterion
+        criterion = loss_od
+
+        # Get the optimizer
+        optimizer = get_optimizer(model.parameters(), self.optimizer_config)
+
+        # Create lr_scheduler 
+        lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_epochs)
+
+        # Create the trainer object
+        self.trainer_obj = Trainer(model, optimizer, criterion, self.epochs, training_dataset_loader=training_dataset_loader_obj)
